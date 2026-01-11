@@ -1,0 +1,10 @@
+django-cors-headers
+djangorestframework
+django
+django-filter
+graphene-django
+django-celery-beat
+django-crontab
+gql
+celery
+redis
