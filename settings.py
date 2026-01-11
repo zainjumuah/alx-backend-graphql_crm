@@ -1,5 +1,3 @@
-
-
 """
 Django settings for alx_backend_graphql_crm project.
 
@@ -265,5 +263,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 GRAPHENE = {
     "SCHEMA": "alx_backend_graphql_crm.schema.schema"  # we’ll create this file next
 }
-
-

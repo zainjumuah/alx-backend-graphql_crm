@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Values Flashcards - Grade 7</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --accent: #dbeafe;
+            --text: #1f2937;
+            --bg: #f3f4f6;
+            --card-front: #ffffff;
+            --card-back: #f0fdf4; /* Light green for answers */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* Card Container - The 3D Space */
+        .card-container {
+            background-color: transparent;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            perspective: 1000px; /* Removes flattening effect */
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        /* The Inner Card - The moving part */
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 20px;
+        }
+
+        /* Class to trigger flip */
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Front and Back Styling */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 2px solid #e5e7eb;
+        }
+
+        .card-front {
+            background-color: var(--card-front);
+            color: var(--text);
+        }
+
+        .card-back {
+            background-color: var(--card-back);
+            color: var(--text);
+            transform: rotateY(180deg);
+            border-color: #86efac;
+        }
+
+        .label {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .content {
+            font-size: 1.6rem;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        
+        .hint {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        .btn-prev {
+            background-color: white;
+            color: var(--text);
+        }
+
+        .btn-next {
+            background-color: var(--primary);
+            color: white;
+            flex-grow: 1; /* Make next button bigger */
+        }
+        
+        .btn-shuffle {
+             background-color: #f59e0b;
+             color: white;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                font-size: 1.3rem;
+            }
+            .card-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🇳🇬 National Values Study Deck</h1>
+    <div class="progress-container">Card <span id="current-index">1</span> of <span id="total-count">50</span></div>
+
+    <div class="card-container" onclick="flipCard()">
+        <div class="card-inner" id="flashcard">
+            <div class="card-face card-front">
+                <div class="label">Question</div>
+                <div class="content" id="question-text">Loading...</div>
+                <div class="hint">Tap to flip</div>
+            </div>
+            <div class="card-face card-back">
+                <div class="label">Answer</div>
+                <div class="content" id="answer-text">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-prev" onclick="prevCard()">Previous</button>
+        <button class="btn-shuffle" onclick="shuffleCards()">Shuffle 🔀</button>
+        <button class="btn-next" onclick="nextCard()">Next Question ➔</button>
+    </div>
+
+    <script>
+        const cardsData = [
+            { q: "What are Values?", a: "Beliefs and standards that guide our behavior and help us tell right from wrong." },
+            { q: "What are National Values?", a: "Specific beliefs a country (like Nigeria) holds dear to ensure peace and progress." },
+            { q: "What are the 3 levels of manifestation of values?", a: "1. Individual level\n2. Societal level\n3. National level" },
+            { q: "What is the 'Individual Level' of values?", a: "How a single person shows good character (like your own personal discipline)." },
+            { q: "What is the 'Societal Level' of values?", a: "How a community or group behaves toward each other (like being a good neighbor)." },
+            { q: "What is the 'National Level' of values?", a: "How citizens show love and respect for their whole country (like patriotism)." },
+            { q: "Give an example of an Individual level value.", a: "Self-control or hard work." },
+            { q: "Give an example of a Societal level value.", a: "Justice, tolerance, or helping the needy." },
+            { q: "Give an example of a National level value.", a: "Loyalty to the country or respecting the national flag." },
+            { q: "Why must values start at the Individual level?", a: "Because for a country to be good, the people in it must be good first." },
+            { q: "Why are values important for social order?", a: "They help people behave correctly, which prevents chaos and fighting." },
+            { q: "How do values help in decision-making?", a: "They act like a compass to help you choose the right path." },
+            { q: "Name one way values promote unity.", a: "By encouraging people from different backgrounds to respect each other." },
+            { q: "Do values help build your future character?", a: "Yes, they help you become a responsible and respected adult." },
+            { q: "What is the very first factor that promotes values in a child?", a: "The Family (Parents and siblings)." },
+            { q: "How do schools promote values?", a: "By teaching rules, teamwork, and respect for others." },
+            { q: "What is the role of Religion in values?", a: "Religions teach core values like love, honesty, and the fear of God." },
+            { q: "What is 'Leadership by Example'?", a: "When leaders behave well so that citizens have a good model to follow." },
+            { q: "How can the Media influence values?", a: "It can promote good values through positive stories or bad values through negative ones." },
+            { q: "What is 'Consistency' in a value system?", a: "Doing the right thing all the time, not just when people are watching." },
+            { q: "How does 'Reward and Punishment' work for values?", a: "Rewards encourage good behavior; punishment discourages bad behavior." },
+            { q: "Name a factor that can destroy a value system.", a: "Corruption or greed." },
+            { q: "True or False: Values are only for adults.", a: "False. They are important for everyone, no matter their age." },
+            { q: "How do values improve a nation’s reputation?", a: "Other countries respect a nation more when its citizens are honest and hardworking." },
+            { q: "What is the definition of Integrity?", a: "Being honest and doing the right thing even when it is difficult." },
+            { q: "What is the meaning of Honesty?", a: "Being truthful, sincere, and free from deceit." },
+            { q: "What is a simple synonym for Honesty?", a: "Truthfulness." },
+            { q: "What does it mean to be an 'upright' person?", a: "To be strictly honest and honorable in everything you do." },
+            { q: "What is the most basic attribute of honesty?", a: "Always telling the truth (Truthfulness)." },
+            { q: "What is 'Reliability'?", a: "When people can depend on you to keep your word." },
+            { q: "What is 'Transparency'?", a: "Being open and clear about your actions so there is no suspicion of cheating." },
+            { q: "You return a lost item to its owner. Which attribute is this?", a: "Integrity and Trustworthiness." },
+            { q: "Is admitting a mistake a sign of honesty?", a: "Yes, it shows you aren't trying to hide the truth." },
+            { q: "What is a personal benefit of being honest?", a: "'Peace of Mind'—you don't have to keep track of lies." },
+            { q: "How does honesty help your career or school life?", a: "People trust you with more responsibilities and opportunities." },
+            { q: "How does honesty benefit a family?", a: "It creates a home where everyone feels safe and trusts each other." },
+            { q: "How does honesty benefit the whole Nation?", a: "It stops corruption and ensures public money is used for the people." },
+            { q: "Why is an honest student a good leader?", a: "Because others feel safe following someone they know won't lie to them." },
+            { q: "What is the direct opposite of Honesty?", a: "Dishonesty or Deceit." },
+            { q: "Why is trust important in a friendship?", a: "Trust (built by honesty) is the foundation of any strong friendship." },
+            { q: "Which level of manifestation does 'Justice' belong to?", a: "Societal and National level." },
+            { q: "Name a way to show values at school.", a: "Obeying school rules and respecting your teachers." },
+            { q: "Define 'Discipline'.", a: "The ability to control your behavior and follow instructions." },
+            { q: "Why is the family called the 'primary unit' of values?", a: "Because it’s the first place you learn right from wrong." },
+            { q: "If a leader steals money, which values are they breaking?", a: "Honesty, Integrity, and Patriotism." },
+            { q: "Name three Nigerian National Values.", a: "Honesty, Discipline, and Patriotism." },
+            { q: "What is 'Tolerance'?", a: "Respecting other people’s opinions or religions even if they are different from yours." },
+            { q: "How can 'Peer Pressure' affect your values?", a: "Friends can either help you keep your values or push you to break them." },
+            { q: "Is cheating on a small quiz still a breach of honesty?", a: "Yes. Honesty applies to big things and small things." },
+            { q: "What is the ultimate goal of National Values?", a: "To build a peaceful, united, and successful country." }
+        ];
+
+        let currentIndex = 0;
+        const flashcard = document.getElementById('flashcard');
+        const questionText = document.getElementById('question-text');
+        const answerText = document.getElementById('answer-text');
+        const currentIndexDisplay = document.getElementById('current-index');
+        const totalCountDisplay = document.getElementById('total-count');
+
+        // Initialize
+        totalCountDisplay.textContent = cardsData.length;
+        loadCard(currentIndex);
+
+        function loadCard(index) {
+            // Reset flip state if moving to new card
+            flashcard.classList.remove('is-flipped');
+            
+            // Wait slightly for animation if user was viewing back
+            setTimeout(() => {
+                questionText.textContent = cardsData[index].q;
+                answerText.innerHTML = cardsData[index].a.replace(/\n/g, "<br>");
+                currentIndexDisplay.textContent = index + 1;
+            }, 200);
+        }
+
+        function flipCard() {
+            flashcard.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < cardsData.length - 1) {
+                currentIndex++;
+                loadCard(currentIndex);
+            } else {
+                // Optional: Loop back to start
+                if(confirm("Great job! You finished the deck. Start over?")) {
+                    currentIndex = 0;
+                    loadCard(currentIndex);
+                }
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadCard(currentIndex);
+            }
+        }
+        
+        function shuffleCards() {
+            // Fisher-Yates shuffle
+            for (let i = cardsData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+            }
+            currentIndex = 0;
+            loadCard(currentIndex);
+            alert("Deck shuffled! Starting from card 1.");
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'Enter') flipCard();
+            if (e.code === 'ArrowRight') nextCard();
+            if (e.code === 'ArrowLeft') prevCard();
+        });
+    </script>
+</body>
+</html>
